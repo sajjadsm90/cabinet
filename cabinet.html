@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محاسبه ابعاد کابینت</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 10px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        select, input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .result {
+            margin-top: 20px;
+            display: none;
+        }
+        .model-options {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>محاسبه ابعاد کابینت</h1>
+        
+        <div class="form-group">
+            <label for="cabinet-type">نوع کابینت:</label>
+            <select id="cabinet-type" onchange="showModelOptions()">
+                <option value="">-- انتخاب کنید --</option>
+                <option value="wall">کابینت دیواری</option>
+                <option value="floor">کابینت زمینی</option>
+                <option value="other">یونیت مخصوص</option>
+            </select>
+        </div>
+        
+        <div id="wall-models" class="model-options">
+            <div class="form-group">
+                <label for="wall-model">مدل کابینت دیواری:</label>
+                <select id="wall-model">
+                    <option value="wall-a">مدل آ</option>
+                    <option value="wall-b">مدل ب</option>
+                    <option value="wall-c">مدل ج</option>
+                    <option value="wall-hood">مدل هود</option>
+                </select>
+            </div>
+        </div>
+        
+        <div id="floor-models" class="model-options">
+            <div class="form-group">
+                <label for="floor-model">مدل کابینت زمینی:</label>
+                <select id="floor-model">
+                    <option value="floor-a">مدل آ</option>
+                    <option value="floor-b">مدل ب</option>
+                    <option value="floor-sink">مدل سینک</option>
+                    <option value="floor-gas">مدل گاز</option>
+                </select>
+            </div>
+        </div>
+        
+        <div id="other-models" class="model-options">
+            <div class="form-group">
+                <label for="other-model">مدل یونیت:</label>
+                <select id="other-model">
+                    <option value="unit-oven-top">یونیت بالا فر</option>
+                    <option value="unit-oven-bottom">یونیت پایین فر</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="total-length">طول کلی (میلیمتر):</label>
+            <input type="number" id="total-length" placeholder="مثال: 900">
+        </div>
+        
+        <div class="form-group">
+            <label for="depth">عمق (میلیمتر):</label>
+            <input type="number" id="depth" placeholder="مثال: 350">
+        </div>
+        
+        <div class="form-group">
+            <label for="height">ارتفاع (میلیمتر):</label>
+            <input type="number" id="height" placeholder="مثال: 900">
+        </div>
+        
+        <button onclick="calculateDimensions()">محاسبه ابعاد برش</button>
+        
+        <div id="result" class="result">
+            <h2>نتایج محاسبات</h2>
+            <table id="result-table">
+                <thead>
+                    <tr>
+                        <th>قطعه</th>
+                        <th>طول (mm)</th>
+                        <th>عرض (mm)</th>
+                        <th>تعداد</th>
+                    </tr>
+                </thead>
+                <tbody id="result-body">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function showModelOptions() {
+            const cabinetType = document.getElementById('cabinet-type').value;
+            document.getElementById('wall-models').style.display = 'none';
+            document.getElementById('floor-models').style.display = 'none';
+            document.getElementById('other-models').style.display = 'none';
+            
+            if (cabinetType === 'wall') {
+                document.getElementById('wall-models').style.display = 'block';
+            } else if (cabinetType === 'floor') {
+                document.getElementById('floor-models').style.display = 'block';
+            } else if (cabinetType === 'other') {
+                document.getElementById('other-models').style.display = 'block';
+            }
+        }
+        
+        function calculateDimensions() {
+            const cabinetType = document.getElementById('cabinet-type').value;
+            if (!cabinetType) {
+                alert('لطفا نوع کابینت را انتخاب کنید');
+                return;
+            }
+            
+            const totalLength = parseInt(document.getElementById('total-length').value) || 0;
+            const depth = parseInt(document.getElementById('depth').value) || 0;
+            const height = parseInt(document.getElementById('height').value) || 0;
+            
+            if (totalLength <= 0 || depth <= 0 || height <= 0) {
+                alert('لطفا ابعاد صحیح وارد کنید');
+                return;
+            }
+            
+            let model;
+            if (cabinetType === 'wall') {
+                model = document.getElementById('wall-model').value;
+            } else if (cabinetType === 'floor') {
+                model = document.getElementById('floor-model').value;
+            } else {
+                model = document.getElementById('other-model').value;
+            }
+            
+            const results = calculateForModel(model, totalLength, depth, height);
+            
+            displayResults(results);
+        }
+        
+        function calculateForModel(model, totalLength, depth, height) {
+            const thickness = 16; // ضخامت وادار
+            const backThickness = 3; // ضخامت پشت بند
+            
+            let results = [];
+            
+            switch(model) {
+                case 'wall-a':
+                    // محاسبات برای کابینت دیواری مدل آ
+                    results.push({name: 'وادار', length: height, width: depth, count: 2});
+                    results.push({name: 'کف', length: totalLength - 2*thickness, width: depth, count: 1});
+                    results.push({name: 'سقف', length: totalLength - 2*thickness, width: depth - 20, count: 1});
+                    results.push({name: 'پشت بند', length: totalLength - 2*thickness + 12, width: height - thickness + 6, count: 1});
+                    results.push({name: 'طبقه', length: totalLength - 2*thickness, width: depth - 20, count: 2});
+                    results.push({name: 'درب', length: totalLength - (depth + 2) - 6, width: ((totalLength - 4)/2) - 3, count: 1});
+                    results.push({name: 'نما ثابت', length: height, width: depth + 18, count: 1});
+                    break;
+                    
+                case 'wall-b':
+                    // محاسبات برای کابینت دیواری مدل ب
+                    results.push({name: 'وادار', length: height, width: depth, count: 2});
+                    results.push({name: 'کف', length: totalLength - 2*thickness, width: depth, count: 1});
+                    results.push({name: 'سقف', length: totalLength - 2*thickness, width: depth - 20, count: 1});
+                    results.push({name: 'پشت بند', length: totalLength - 2*thickness + 12, width: height - thickness + 6, count: 1});
+                    results.push({name: 'طبقه', length: totalLength - 2*thickness, width: depth - 20, count: 2});
+                    results.push({name: 'درب', length: height + 13, width: ((totalLength - 4)/2) - 3, count: totalLength <= 600 ? 1 : 2});
+                    results.push({name: 'کاذب پشت', length: totalLength - 33, width: 100, count: 2});
+                    break;
+                    
+                // موارد دیگر مدل‌ها را می‌توانید به همین ترتیب اضافه کنید
+                
+                default:
+                    alert('مدل انتخاب شده پشتیبانی نمی‌شود');
+                    return [];
+            }
+            
+            return results;
+        }
+        
+        function displayResults(results) {
+            const resultBody = document.getElementById('result-body');
+            resultBody.innerHTML = '';
+            
+            results.forEach(item => {
+                const row = document.createElement('tr');
+                
+                const nameCell = document.createElement('td');
+                nameCell.textContent = item.name;
+                row.appendChild(nameCell);
+                
+                const lengthCell = document.createElement('td');
+                lengthCell.textContent = item.length;
+                row.appendChild(lengthCell);
+                
+                const widthCell = document.createElement('td');
+                widthCell.textContent = item.width;
+                row.appendChild(widthCell);
+                
+                const countCell = document.createElement('td');
+                countCell.textContent = item.count;
+                row.appendChild(countCell);
+                
+                resultBody.appendChild(row);
+            });
+            
+            document.getElementById('result').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
